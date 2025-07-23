@@ -1,13 +1,19 @@
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import ApplicationBuilder, CommandHandler, CallbackQueryHandler, ContextTypes
-import requests
 import os
+import requests
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram.ext import (
+    ApplicationBuilder,
+    CommandHandler,
+    CallbackQueryHandler,
+    ContextTypes,
+)
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 
+
 def get_syncra_course():
-    url = "https://api.syncra.me/v1/public/exchange/rates?apiKey=91b59641-818c-440e-b087-097cd9fc38c7"
     try:
+        url = "https://api.syncra.me/v1/public/exchange/rates?apiKey=91b59641-818c-440e-b087-097cd9fc38c7"
         response = requests.get(url)
         data = response.json()
         rates = data.get("value", [])
@@ -22,11 +28,12 @@ def get_syncra_course():
         else:
             return "❌ Не удалось получить курс от Syncra."
     except Exception as e:
-        return f"⚠️ Ошибка Syncra: {e}"
+        return f"⚠️ Ошибка при получении курса Syncra: {e}"
+
 
 def get_rapier_course():
-    url = "https://api.rapira.net/market/symbol-thumb"
     try:
+        url = "https://api.rapira.net/market/symbol-thumb"
         response = requests.get(url)
         data = response.json()
         for item in data:
@@ -34,37 +41,41 @@ def get_rapier_course():
                 return f"📊 Rapier:\nКурс USDT/RUB: {item['close']}"
         return "❌ Курс USDT/RUB от Rapier не найден."
     except Exception as e:
-        return f"⚠️ Ошибка Rapier: {e}"
+        return f"⚠️ Ошибка при получении курса Rapier: {e}"
+
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [
         [InlineKeyboardButton("💸 Курс Syncra", callback_data="syncra")],
-        [InlineKeyboardButton("📊 Курс Rapier", callback_data="rapier")]
+        [InlineKeyboardButton("📊 Курс Rapier", callback_data="rapier")],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await update.message.reply_text("Выберите источник курса:", reply_markup=reply_markup)
+
 
 async def handle_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
 
     if query.data == "syncra":
-        result = get_syncra_course()
+        text = get_syncra_course()
     elif query.data == "rapier":
-        result = get_rapier_course()
+        text = get_rapier_course()
     else:
-        result = "Неизвестная команда."
+        text = "Неизвестная команда."
 
-    await query.edit_message_text(result)
+    await query.edit_message_text(text=text)
+
 
 async def main():
-    app = ApplicationBuilder().token(BOT_TOKEN).build()
+    application = ApplicationBuilder().token(BOT_TOKEN).build()
 
-    app.add_handler(CommandHandler("start", start))
-    app.add_handler(CallbackQueryHandler(handle_button))
+    application.add_handler(CommandHandler("start", start))
+    application.add_handler(CallbackQueryHandler(handle_button))
 
     print("Бот запущен...")
-    await app.run_polling()
+    await application.run_polling()
+
 
 if __name__ == "__main__":
     import asyncio
