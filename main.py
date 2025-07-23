@@ -67,16 +67,15 @@ async def handle_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await query.edit_message_text(text=text)
 
 
-async def main():
+def main():
     application = ApplicationBuilder().token(BOT_TOKEN).build()
 
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CallbackQueryHandler(handle_button))
 
     print("Бот запущен...")
-    await application.run_polling()
+    application.run_polling()
 
 
 if __name__ == "__main__":
-    import asyncio
-    asyncio.run(main())
+    main()
