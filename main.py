@@ -3,7 +3,7 @@ from telegram.ext import ApplicationBuilder, CommandHandler, CallbackQueryHandle
 import requests
 import os
 
-TOKEN = os.getenv("BOT_TOKEN")  # API-ключ из переменной окружения
+TOKEN = os.getenv("BOT_TOKEN")
 
 def get_syncra_course():
     url = "https://api.syncra.me/v1/public/exchange/rates?apiKey=91b59641-818c-440e-b087-097cd9fc38c7"
@@ -26,10 +26,26 @@ def get_syncra_course():
     except Exception as e:
         return f"⚠️ Ошибка при получении курса Syncra: {e}"
 
+def get_rapier_course():
+    url = "https://api.rapira.net/market/symbol-thumb"
+    try:
+        response = requests.get(url)
+        data = response.json()
+
+        for item in data:
+            if item.get("symbol") == "USDT/RUB":
+                return f"📊 Rapier:\nКурс USDT/RUB: {item['close']}"
+        return "❌ Не найден курс USDT/RUB от Rapier."
+    except Exception as e:
+        return f"⚠️ Ошибка при получении курса Rapier: {e}"
+
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    keyboard = [[InlineKeyboardButton("Курс Syncra", callback_data="syncra")]]
+    keyboard = [
+        [InlineKeyboardButton("💸 Курс Syncra", callback_data="syncra")],
+        [InlineKeyboardButton("📊 Курс Rapier", callback_data="rapier")]
+    ]
     reply_markup = InlineKeyboardMarkup(keyboard)
-    await update.message.reply_text("Выберите опцию:", reply_markup=reply_markup)
+    await update.message.reply_text("Выберите источник курса:", reply_markup=reply_markup)
 
 async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
@@ -37,7 +53,12 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if query.data == "syncra":
         text = get_syncra_course()
-        await query.edit_message_text(text=text)
+    elif query.data == "rapier":
+        text = get_rapier_course()
+    else:
+        text = "Неизвестная команда."
+
+    await query.edit_message_text(text=text)
 
 def main():
     app = ApplicationBuilder().token(TOKEN).build()
