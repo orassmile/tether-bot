@@ -41,10 +41,10 @@ def get_rapira_buy_rate():
 
 def build_course_message():
     syncra = get_syncra_buy_rate()
-    rapier = get_rapira_buy_rate()
+    rapira = get_rapira_buy_rate()
 
     try:
-        if isinstance(syncra, (int, float)) and isinstance(rapier, (int, float)):
+        if isinstance(syncra, (int, float)) and isinstance(rapira, (int, float)):
             spread = round(((syncra - rapira) / rapira) * 100, 2)
             spread_str = f"{spread}%"
         else:
