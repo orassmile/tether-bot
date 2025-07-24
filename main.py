@@ -26,7 +26,7 @@ def get_syncra_buy_rate():
         return f"ошибка ({e})"
 
 
-def get_rapier_buy_rate():
+def get_rapira_buy_rate():
     try:
         url = "https://api.rapira.net/market/symbol-thumb"
         response = requests.get(url)
@@ -41,11 +41,11 @@ def get_rapier_buy_rate():
 
 def build_course_message():
     syncra = get_syncra_buy_rate()
-    rapier = get_rapier_buy_rate()
+    rapier = get_rapira_buy_rate()
 
     try:
         if isinstance(syncra, (int, float)) and isinstance(rapier, (int, float)):
-            spread = round(((syncra - rapier) / rapier) * 100, 2)
+            spread = round(((syncra - rapira) / rapira) * 100, 2)
             spread_str = f"{spread}%"
         else:
             spread_str = "недоступен"
@@ -54,7 +54,7 @@ def build_course_message():
 
     return f"""Покупка USDT за ₽:
 Syncra: {syncra}
-Rapier: {rapier}
+Rapira: {rapira}
 Спред: {spread_str}"""
 
 
