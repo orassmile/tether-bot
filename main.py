@@ -157,7 +157,7 @@ def main():
     application.post_init = set_menu
 
     # каждые 30 минут; первый запуск — сразу
-    application.job_queue.run_repeating(callback=push_rates, interval=1800, first=0)
+    application.job_queue.run_repeating(callback=push_rates, interval=600, first=0)
 
     print("Бот запущен...")
     application.run_polling()
